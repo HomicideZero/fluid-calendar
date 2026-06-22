@@ -9,6 +9,7 @@ import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
 import {
   deleteTaskBlockEvent,
+  repushDirtyBlocks,
   schedulePushTaskBlock,
 } from "@/lib/task-block-push";
 import {
@@ -16,6 +17,7 @@ import {
   TaskChangeTracker,
 } from "@/lib/task-sync/task-change-tracker";
 import { normalizeRecurrenceRule } from "@/lib/utils/normalize-recurrence-rules";
+import { scheduleAllTasksForUser } from "@/services/scheduling/TaskSchedulingService";
 
 import { TaskStatus } from "@/types/task";
 
@@ -288,6 +290,19 @@ export async function PUT(
 
     // Schedule calendar block push for any changes to scheduled times or status
     schedulePushTaskBlock(userId, id);
+
+    // Completing an auto-scheduled task frees the time it occupied. Re-plan the
+    // remaining tasks so they pull forward into the gap, then re-sync the blocks
+    // that moved to their new times. Only runs on the todo -> completed edge for
+    // an auto-scheduled task, so unrelated edits don't trigger a replan.
+    if (
+      updates.status === TaskStatus.COMPLETED &&
+      task.status !== TaskStatus.COMPLETED &&
+      task.isAutoScheduled
+    ) {
+      await scheduleAllTasksForUser(userId);
+      await repushDirtyBlocks(userId);
+    }
 
     return NextResponse.json(updatedTask);
   } catch (error) {
