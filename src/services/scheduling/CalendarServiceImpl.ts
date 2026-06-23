@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { getPushedBlockEventIds } from "@/lib/task-block-push";
 
 import { Conflict, TimeSlot } from "@/types/scheduling";
+import { TaskStatus } from "@/types/task";
 
 import { BatchConflictCheck, CalendarService } from "./CalendarService";
 
@@ -114,6 +115,10 @@ export class CalendarServiceImpl implements CalendarService {
         isAutoScheduled: true,
         scheduledStart: { not: null },
         scheduledEnd: { not: null },
+        // A completed task's time is free: it must NOT block the slot it used to
+        // occupy, otherwise checking a task off can't compact the remaining
+        // tasks forward into the vacated time (they'd see it as still busy).
+        status: { not: TaskStatus.COMPLETED },
         id: excludeTaskId ? { not: excludeTaskId } : undefined,
         userId,
       },
@@ -243,6 +248,10 @@ export class CalendarServiceImpl implements CalendarService {
         isAutoScheduled: true,
         scheduledStart: { not: null },
         scheduledEnd: { not: null },
+        // A completed task's time is free: it must NOT block the slot it used to
+        // occupy, otherwise checking a task off can't compact the remaining
+        // tasks forward into the vacated time (they'd see it as still busy).
+        status: { not: TaskStatus.COMPLETED },
         id: excludeTaskId ? { not: excludeTaskId } : undefined,
         userId,
       },
