@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/select";
 
 import { useCalendarStore } from "@/store/calendar";
+import { useCalendarViewSettings } from "@/store/calendarViewSettings";
 import { useSettingsStore } from "@/store/settings";
 
 import { SettingRow, SettingsSection } from "./SettingsSection";
@@ -20,6 +21,8 @@ export function CalendarSettings() {
   const { calendar, updateCalendarSettings, user, updateUserSettings } =
     useSettingsStore();
   const { feeds, loadFromDatabase } = useCalendarStore();
+  const { createOnDoubleClick, setCreateOnDoubleClick } =
+    useCalendarViewSettings();
 
   // Load feeds when component mounts
   useEffect(() => {
@@ -174,6 +177,24 @@ export function CalendarSettings() {
               ))}
             </div>
           </div>
+        </div>
+      </SettingRow>
+
+      <SettingRow
+        label="Click to create"
+        description="Choose whether clicking an empty calendar slot creates immediately, or requires a double-click. Double-click avoids accidental events from a stray click; drag-to-create always works."
+      >
+        <div className="flex items-center space-x-2">
+          <Checkbox
+            id="create-on-double-click"
+            checked={createOnDoubleClick}
+            onCheckedChange={(checked) =>
+              setCreateOnDoubleClick(checked as boolean)
+            }
+          />
+          <Label htmlFor="create-on-double-click">
+            Require double-click to create
+          </Label>
         </div>
       </SettingRow>
     </SettingsSection>

@@ -13,6 +13,16 @@ interface CalendarViewSettings {
   showCompletedTasks: boolean;
   setShowCompletedTasks: (show: boolean) => void;
   toggleShowCompletedTasks: () => void;
+
+  /**
+   * When true, creating an event/task by clicking an empty calendar slot
+   * requires a double-click; a single click only navigates. Prevents
+   * accidentally opening the create modal on a stray click. Drag-to-create is
+   * unaffected.
+   */
+  createOnDoubleClick: boolean;
+  setCreateOnDoubleClick: (value: boolean) => void;
+  toggleCreateOnDoubleClick: () => void;
 }
 
 export const useCalendarViewSettings = create<CalendarViewSettings>()(
@@ -22,6 +32,12 @@ export const useCalendarViewSettings = create<CalendarViewSettings>()(
       setShowCompletedTasks: (showCompletedTasks) => set({ showCompletedTasks }),
       toggleShowCompletedTasks: () =>
         set((state) => ({ showCompletedTasks: !state.showCompletedTasks })),
+
+      createOnDoubleClick: false,
+      setCreateOnDoubleClick: (createOnDoubleClick) =>
+        set({ createOnDoubleClick }),
+      toggleCreateOnDoubleClick: () =>
+        set((state) => ({ createOnDoubleClick: !state.createOnDoubleClick })),
     }),
     {
       name: "calendar-view-settings",

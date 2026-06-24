@@ -29,6 +29,7 @@ import { CalendarEventContent } from "./CalendarEventContent";
 import { EventModal } from "./EventModal";
 import { EventQuickView } from "./EventQuickView";
 import { useCalendarDragHandlers } from "./useCalendarDragHandlers";
+import { useCreateClickGate } from "./useCreateClickGate";
 
 interface WeekViewProps {
   currentDate: Date;
@@ -196,6 +197,20 @@ export function WeekView({ currentDate, onDateClick }: WeekViewProps) {
     setIsEventModalOpen(true);
   };
 
+  const openCreateAt = useCallback(
+    (start: Date, end: Date, allDay: boolean) => {
+      setSelectedDate(start);
+      setSelectedEndDate(end);
+      setSelectedEvent({ allDay });
+      setIsEventModalOpen(true);
+    },
+    []
+  );
+  const { selectMinDistance, handleDateClick } = useCreateClickGate(
+    onDateClick,
+    openCreateAt
+  );
+
   const handleEventModalClose = () => {
     setIsEventModalOpen(false);
     eventModalStore.setOpen(false);
@@ -323,10 +338,11 @@ export function WeekView({ currentDate, onDateClick }: WeekViewProps) {
           omitCommas: true,
         }}
         height="100%"
-        dateClick={(arg) => onDateClick?.(arg.date)}
+        dateClick={handleDateClick}
         eventClick={handleEventClick}
         select={handleDateSelect}
         selectable={true}
+        selectMinDistance={selectMinDistance}
         selectMirror={true}
         datesSet={handleDatesSet}
         eventContent={renderEventContent}

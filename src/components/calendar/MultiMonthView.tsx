@@ -27,6 +27,7 @@ import { Task, TaskStatus } from "@/types/task";
 import { CalendarEventContent } from "./CalendarEventContent";
 import { EventModal } from "./EventModal";
 import { EventQuickView } from "./EventQuickView";
+import { useCreateClickGate } from "./useCreateClickGate";
 
 interface MultiMonthViewProps {
   currentDate: Date;
@@ -185,6 +186,20 @@ export function MultiMonthView({
     setIsEventModalOpen(true);
   };
 
+  const openCreateAt = useCallback(
+    (start: Date, end: Date, allDay: boolean) => {
+      setSelectedDate(start);
+      setSelectedEndDate(end);
+      setSelectedEvent({ allDay });
+      setIsEventModalOpen(true);
+    },
+    []
+  );
+  const { selectMinDistance, handleDateClick } = useCreateClickGate(
+    onDateClick,
+    openCreateAt
+  );
+
   const handleEventModalClose = () => {
     setIsEventModalOpen(false);
     eventModalStore.setOpen(false);
@@ -278,10 +293,11 @@ export function MultiMonthView({
         displayEventEnd={true}
         firstDay={userSettings.weekStartDay === "monday" ? 1 : 0}
         height="100%"
-        dateClick={(arg) => onDateClick?.(arg.date)}
+        dateClick={handleDateClick}
         eventClick={handleEventClick}
         select={handleDateSelect}
         selectable={true}
+        selectMinDistance={selectMinDistance}
         selectMirror={true}
         datesSet={handleDatesSet}
         eventContent={renderEventContent}
