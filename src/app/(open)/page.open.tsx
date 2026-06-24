@@ -41,7 +41,7 @@ export default function OpenSourceHomePage() {
 
       {/* Main */}
       <main className="relative z-10 flex flex-grow flex-col items-center justify-center px-6 py-16">
-        <div className="w-full max-w-md rounded-2xl border border-[rgba(120,190,255,0.25)] bg-[rgba(10,14,22,0.55)] px-8 py-10 text-center shadow-[0_0_60px_rgba(30,150,255,0.18)] backdrop-blur-md">
+        <div className="w-full max-w-md rounded-2xl border border-[rgba(120,190,255,0.25)] bg-[rgba(10,14,22,0.55)] px-8 py-10 text-center shadow-[0_0_60px_rgba(30,150,255,0.18)] backdrop-blur-md transition-opacity duration-500 [@media(hover:hover)]:opacity-30 [@media(hover:hover)]:hover:opacity-100">
           {/* Org mark */}
           <div className="mb-7 flex flex-col items-center">
             <h2 className="font-mono text-2xl font-bold tracking-[0.18em] text-[#e8f4ff] [text-shadow:0_0_28px_rgba(60,160,255,0.5)]">
