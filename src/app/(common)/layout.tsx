@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 import dynamic from "next/dynamic";
+import { usePathname } from "next/navigation";
 
 import { DndProvider } from "@/components/dnd/DndProvider";
 import { AppNav } from "@/components/navigation/AppNav";
@@ -46,6 +47,7 @@ export default function RootLayout({
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const { isOpen: shortcutsOpen, setOpen: setShortcutsOpen } =
     useShortcutsStore();
+  const pathname = usePathname();
 
   // Use the page title hook
   usePageTitle();
@@ -64,6 +66,18 @@ export default function RootLayout({
     document.addEventListener("keydown", down);
     return () => document.removeEventListener("keydown", down);
   }, [setShortcutsOpen]);
+
+  // Auth pages (sign-in, reset-password) render full-screen without the app
+  // chrome — no nav bar, command palette, or footer over the landing visuals.
+  const isAuthRoute = pathname?.startsWith("/auth") ?? false;
+  if (isAuthRoute) {
+    return (
+      <div className="flex min-h-screen flex-col">
+        <SessionProvider>{children}</SessionProvider>
+        <Toaster />
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen flex-col">
