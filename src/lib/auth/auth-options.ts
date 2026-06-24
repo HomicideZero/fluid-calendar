@@ -6,6 +6,7 @@ import GoogleProvider from "next-auth/providers/google";
 import { getGoogleCredentials, getOutlookCredentials } from "@/lib/auth";
 import { authenticateUser } from "@/lib/auth/credentials-provider";
 import { logger } from "@/lib/logger";
+import { prisma } from "@/lib/prisma";
 import { MICROSOFT_GRAPH_SCOPES } from "@/lib/outlook";
 
 // Define a type for our user with role
@@ -94,8 +95,37 @@ export async function getAuthOptions(): Promise<NextAuthOptions> {
       async jwt({ token, account, profile, user }) {
         // Initial sign in
         if (account && profile) {
+          // OAuth providers (Google/Microsoft) would otherwise stamp the token
+          // with the provider's own subject id. Since the rest of the app
+          // resolves the current user from token.sub, that orphans the user
+          // from their existing FluidCalendar account (calendars, tasks, etc.).
+          // Resolve the existing user by email and pin token.sub to it so an
+          // OAuth login maps to the real account. Falls back to the provider
+          // sub when no matching user exists.
+          let sub = token.sub;
+          let role = token.role;
+          if (profile.email) {
+            try {
+              const dbUser = await prisma.user.findUnique({
+                where: { email: profile.email },
+                select: { id: true, role: true },
+              });
+              if (dbUser) {
+                sub = dbUser.id;
+                role = dbUser.role ?? undefined;
+              }
+            } catch (error) {
+              logger.error(
+                "Failed to resolve OAuth user by email",
+                { error: error instanceof Error ? error.message : "unknown" },
+                LOG_SOURCE
+              );
+            }
+          }
           return {
             ...token,
+            sub,
+            role,
             accessToken: account.access_token,
             refreshToken: account.refresh_token,
             expiresAt: account.expires_at,
