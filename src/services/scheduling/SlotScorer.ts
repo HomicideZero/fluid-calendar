@@ -48,9 +48,12 @@ export class SlotScorer {
       timePreference: this.scoreTimePreference(slot, task),
       deadlineProximity: this.scoreDeadlineProximity(slot, task),
       priorityScore: this.scorePriority(task),
+      earliness: this.scoreEarliness(slot),
     };
 
-    // Calculate total score (weighted average)
+    // Calculate total score (weighted average). `earliness` is weighted
+    // heavily so the day packs forward — tasks snug up to the earliest open
+    // slot and fill gaps (Motion-style) rather than spreading out.
     const weights = {
       workHourAlignment: 1.0,
       energyLevelMatch: 1.5,
@@ -59,6 +62,7 @@ export class SlotScorer {
       timePreference: 1.2,
       deadlineProximity: 3.0,
       priorityScore: 1.8,
+      earliness: 4.0,
     };
 
     const totalWeight = Object.values(weights).reduce((a, b) => a + b, 0);
@@ -126,6 +130,22 @@ export class SlotScorer {
     return Math.exp(-(Math.log(2) / 7) * daysToSlot); // Decay to 0.5 over a week
   }
 
+  /**
+   * Pack the schedule forward: the sooner a slot is, the higher it scores.
+   * Decays over ~1.5 days so slots within the same day are clearly
+   * differentiated (an earlier opening beats a later one), which lets tasks
+   * snug up to the earliest available time and fill gaps instead of drifting
+   * later. Combined with its heavy weight this front-loads the day.
+   */
+  private scoreEarliness(slot: TimeSlot): number {
+    const minutesFromNow = Math.max(
+      0,
+      differenceInMinutes(slot.start, newDate())
+    );
+    const decayMinutes = 1.5 * 24 * 60; // ~1.5 days
+    return Math.exp(-minutesFromNow / decayMinutes);
+  }
+
   private scoreDeadlineProximity(slot: TimeSlot, task: Task): number {
     if (!task.dueDate) {
       return 0.5; // Neutral score for no due date
@@ -156,12 +176,14 @@ export class SlotScorer {
       return baseScore * (1 - timePenalty);
     }
 
-    // For future tasks (unchanged)
+    // For future tasks the due date is a LIMIT, not a target: don't pull work
+    // toward the deadline (that fights front-loading). Any slot that meets the
+    // deadline scores full; a slot that would miss it is strongly discouraged.
     const minutesToDeadline = differenceInMinutes(task.dueDate, slot.start);
-    const daysToDeadline = minutesToDeadline / (24 * 60);
-    const score = Math.min(0.99, Math.exp(-daysToDeadline / 3));
-
-    return score;
+    if (minutesToDeadline < 0) {
+      return 0.1; // slot falls past the due date
+    }
+    return 1.0;
   }
 
   private scoreProjectProximity(slot: TimeSlot, task: Task): number {

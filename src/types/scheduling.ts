@@ -40,5 +40,6 @@ export interface SlotScore {
     timePreference: number;
     deadlineProximity: number;
     priorityScore: number;
+    earliness: number;
   };
 }
