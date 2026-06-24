@@ -27,3 +27,9 @@ jobs:
           tags: |
             ghcr.io/homicidezero/fluid-calendar:deploy
             ghcr.io/homicidezero/fluid-calendar:${{ github.sha }}
+          # Persist Docker layer cache in a dedicated ghcr tag so unchanged
+          # layers (notably the slow `npm ci --legacy-peer-deps`) are restored
+          # instead of rebuilt. The first build after this lands populates the
+          # cache; later builds with unchanged deps skip the install entirely.
+          cache-from: type=registry,ref=ghcr.io/homicidezero/fluid-calendar:buildcache
+          cache-to: type=registry,ref=ghcr.io/homicidezero/fluid-calendar:buildcache,mode=max
