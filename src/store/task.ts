@@ -1,3 +1,4 @@
+import { toast } from "sonner";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
@@ -116,7 +117,20 @@ export const useTaskStore = create<TaskState>()(
       },
 
       updateTask: async (id: string, updates: UpdateTask) => {
-        set({ loading: true, error: null });
+        // Optimistic update: apply the change to local state immediately so the
+        // UI (checkmark, dim/hide, strike-through) responds on the next frame
+        // instead of waiting on the server reschedule + calendar sync. We then
+        // reconcile with the server in the background. If the chain fails we
+        // revert to the captured truth and surface a toast, so the UI never
+        // keeps showing a change that didn't actually persist.
+        const previousTask = get().tasks.find((task) => task.id === id);
+        set((state) => ({
+          error: null,
+          tasks: state.tasks.map((task) =>
+            task.id === id ? ({ ...task, ...updates } as Task) : task
+          ),
+        }));
+
         try {
           const response = await fetch(`/api/tasks/${id}`, {
             method: "PUT",
@@ -130,18 +144,33 @@ export const useTaskStore = create<TaskState>()(
           }
 
           const updatedTask = await response.json();
+          // Reconcile with the server's authoritative version (settles any
+          // server-derived fields the optimistic merge couldn't know).
           set((state) => ({
             tasks: state.tasks.map((task) =>
               task.id === id ? updatedTask : task
             ),
           }));
-          await get().triggerScheduleAllTasks();
+          // Re-plan in the background — don't block the click on the
+          // reschedule/sync; the calendar reflows when it lands.
+          void get()
+            .triggerScheduleAllTasks()
+            .catch(() => {
+              /* reschedule failures are non-fatal to the saved change */
+            });
           return updatedTask;
         } catch (error) {
+          // Revert to the truth and tell the user it didn't stick.
+          if (previousTask) {
+            set((state) => ({
+              tasks: state.tasks.map((task) =>
+                task.id === id ? previousTask : task
+              ),
+            }));
+          }
+          toast.error("Couldn't save that change — reverted.");
           set({ error: error as Error });
           throw error;
-        } finally {
-          set({ loading: false });
         }
       },
 
