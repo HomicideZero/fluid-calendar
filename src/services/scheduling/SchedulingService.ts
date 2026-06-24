@@ -195,7 +195,15 @@ export class SchedulingService {
     const sortedTasks = [...tasksToSchedule].sort((a, b) => {
       const aScore = initialScores.get(a.id) || 0;
       const bScore = initialScores.get(b.id) || 0;
-      return bScore - aScore; // Higher scores first
+      if (Math.abs(aScore - bScore) > 1e-6) {
+        return bScore - aScore; // Higher scores first
+      }
+      // Tiebreaker: when best-possible scores are effectively equal, schedule
+      // the task with the sooner due date first so it lands in the earlier
+      // slot. Tasks with no due date sort after those that have one.
+      const aDue = a.dueDate ? a.dueDate.getTime() : Infinity;
+      const bDue = b.dueDate ? b.dueDate.getTime() : Infinity;
+      return aDue - bDue;
     });
 
     const schedulingStart = this.startMetric("scheduleTasks", {
