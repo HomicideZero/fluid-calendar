@@ -38,8 +38,8 @@ interface Drop {
 const FACE_MASK_SRC = "/hz-face-mask.png";
 const FACE_GAMMA = 1.0;
 const FACE_SCALE = 1.25;
-const FACE_BRIGHTEN = 5.0;
-const FACE_BG_DIM = 0.35;
+const FACE_BRIGHTEN = 6.5;
+const FACE_BG_DIM = 0.26;
 const FACE_BEND = 3.5;
 const FACE_SPEED_SLOW = 0.3;
 const FACE_WHITE_SHIFT = 255;

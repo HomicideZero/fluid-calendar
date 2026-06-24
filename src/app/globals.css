@@ -112,11 +112,11 @@
 }
 
 .fc .fc-button {
-  @apply bg-white border border-gray-300 text-gray-700 px-3 py-1.5 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
+  @apply rounded-md border border-gray-300 bg-white px-3 py-1.5 text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
 }
 
 .fc .fc-button-primary {
-  @apply bg-blue-600 text-white border-blue-600 hover:bg-blue-700;
+  @apply border-blue-600 bg-blue-600 text-white hover:bg-blue-700;
 }
 
 .fc .fc-daygrid-day-frame {
@@ -132,7 +132,7 @@
 }
 
 .fc .fc-event {
-  @apply rounded shadow-sm border-none cursor-pointer;
+  @apply cursor-pointer rounded border-none shadow-sm;
 }
 
 .fc .fc-event-main {
@@ -164,7 +164,7 @@
 }
 
 .fc .fc-day-header {
-  @apply py-2 border-b border-gray-200;
+  @apply border-b border-gray-200 py-2;
 }
 
 .fc .fc-scrollgrid {
@@ -172,12 +172,12 @@
 }
 
 .fc .fc-col-header-cell {
-  @apply bg-white border-b border-gray-200;
+  @apply border-b border-gray-200 bg-white;
 }
 
 /* Dark mode styles for FullCalendar */
 .dark .fc {
-  --fc-small-font-size: .85em;
+  --fc-small-font-size: 0.85em;
   --fc-page-bg-color: hsl(var(--background));
   --fc-neutral-bg-color: hsl(var(--muted) / 0.2);
   --fc-neutral-text-color: hsl(var(--muted-foreground));
@@ -369,4 +369,41 @@
   color: var(--foreground) !important;
   font-weight: 500 !important;
   opacity: 1 !important;
+}
+
+/* HomicideZero entry-page motion: card rises in on load, wordmark glows. */
+@keyframes hz-rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes hz-glow {
+  0%,
+  100% {
+    text-shadow: 0 0 24px rgba(60, 160, 255, 0.35);
+  }
+  50% {
+    text-shadow: 0 0 42px rgba(60, 160, 255, 0.65);
+  }
+}
+
+.hz-rise {
+  animation: hz-rise 0.7s ease-out both;
+}
+
+.hz-glow {
+  animation: hz-glow 4.5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hz-rise,
+  .hz-glow {
+    animation: none !important;
+  }
 }

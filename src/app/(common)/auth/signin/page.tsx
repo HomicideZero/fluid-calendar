@@ -34,23 +34,25 @@ export default async function SignInPage() {
         }}
       />
 
-      <div className="relative z-10 w-full max-w-sm rounded-2xl border border-[rgba(120,190,255,0.25)] bg-[rgba(10,14,22,0.55)] px-8 py-10 text-center shadow-[0_0_60px_rgba(30,150,255,0.18)] backdrop-blur-md transition-opacity duration-500 [@media(hover:hover)]:opacity-30 [@media(hover:hover)]:hover:opacity-100">
-        {/* Org mark */}
-        <div className="mb-6 flex flex-col items-center">
-          <h2 className="font-mono text-2xl font-bold tracking-[0.18em] text-[#e8f4ff] [text-shadow:0_0_28px_rgba(60,160,255,0.5)]">
-            HOMICIDE<span className="text-[#1e96ff]">ZERO</span>
-          </h2>
-          <span className="mt-2 font-mono text-[0.7rem] uppercase tracking-[0.4em] text-[rgba(200,230,255,0.55)]">
-            AI Operations
-          </span>
+      <div className="hz-rise relative z-10 w-full max-w-sm">
+        <div className="rounded-2xl border border-[rgba(120,190,255,0.25)] bg-[rgba(10,14,22,0.55)] px-8 py-10 text-center shadow-[0_0_60px_rgba(30,150,255,0.18)] backdrop-blur-md transition-opacity duration-500 [@media(hover:hover)]:opacity-30 [@media(hover:hover)]:hover:opacity-100">
+          {/* Org mark */}
+          <div className="mb-6 flex flex-col items-center">
+            <h2 className="hz-glow font-mono text-2xl font-bold tracking-[0.18em] text-[#e8f4ff] [text-shadow:0_0_28px_rgba(60,160,255,0.5)]">
+              HOMICIDE<span className="text-[#1e96ff]">ZERO</span>
+            </h2>
+            <span className="mt-2 font-mono text-[0.7rem] uppercase tracking-[0.4em] text-[rgba(200,230,255,0.55)]">
+              AI Operations
+            </span>
+          </div>
+
+          <p className="mx-auto mb-8 max-w-xs text-sm leading-relaxed text-[rgba(200,230,255,0.7)]">
+            Homicide Zero uses company federated login. Sign in with your
+            organization Google account to continue.
+          </p>
+
+          <FederatedSignIn />
         </div>
-
-        <p className="mx-auto mb-8 max-w-xs text-sm leading-relaxed text-[rgba(200,230,255,0.7)]">
-          Homicide Zero uses company federated login. Sign in with your
-          organization Google account to continue.
-        </p>
-
-        <FederatedSignIn />
       </div>
     </div>
   );
